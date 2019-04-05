@@ -10,7 +10,7 @@ return [
 ];
 ```
 
-you can then run `pipenv run python3 render.py config.template.php config.php` which will result in `{{/DB/Metaeskuel/Jonna/Password}}` being filled out with the password stored in parameter store resulting in
+you can then run `python3 render.py config.template.php > config.php` which will result in `{{ /DB/Metaeskuel/Jonna/Password }}` being filled out with the password stored in parameter store resulting in
 ```php
 <?php
 return [
