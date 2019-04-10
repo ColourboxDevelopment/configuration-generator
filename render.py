@@ -7,12 +7,11 @@ from botocore.exceptions import ParamValidationError
 
 c = "".join(fileinput.input())
 
-try:
+names = re.findall('{{ ?([^ ]*) ?}}', c)
+if len(names) > 0:
     r = boto3.client('ssm').get_parameters(Names=re.findall('{{ ?([^ ]*) ?}}', c), WithDecryption=True)
-except ParamValidationError:
-    r = {'Parameters': []}
 
-for p in r['Parameters']:
-    c = re.sub('{{ ?' + p['Name'] + ' ?}}', p['Value'], c)
+    for p in r['Parameters']:
+        c = re.sub('{{ ?' + p['Name'] + ' ?}}', p['Value'], c)
 
 print(c)
