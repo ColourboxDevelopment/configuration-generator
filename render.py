@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 import boto3
-import sys
 import fileinput
 import re
-from botocore.exceptions import ParamValidationError
 
 c = "".join(fileinput.input())
 
