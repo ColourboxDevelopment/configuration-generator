@@ -17,7 +17,11 @@ if len(names) > 0:
 names = re.findall(pattern, c)
 if len(names) > 0:
     for name in names:
-        sys.stderr.write("\nERROR: Configuration parameter was not replaced: \n\n\t{}\n\n".format(name))
+        sys.stderr.write("ERROR: Configuration parameter was not replaced: \n\n\t{}\n\n".format(name))
+    sys.exit(1)
+
+if re.search('{{|}}|{ ?([^ ]*) ?}', c):
+    sys.stderr.write("ERROR: Configuration template contains malformed template strings: {}\n".format(fileinput.filename()))
     sys.exit(1)
 
 print(c)
