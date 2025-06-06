@@ -1,27 +1,37 @@
+"""
+Read the README.md
+"""
 #!/usr/bin/env python3
-import boto3
 import fileinput
 import re
 import sys
+import boto3
 
-pattern = '{{ ?([^ ]*) ?}}'
-c = "".join(fileinput.input())
+PATTERN = '{{ ?([^ ]*) ?}}'
+FILE_CONTENTS = "".join(fileinput.input())
 
-names = re.findall(pattern, c)
+names = re.findall(PATTERN, FILE_CONTENTS)
 if len(names) > 0:
-    r = boto3.client('ssm').get_parameters(Names=re.findall(pattern, c), WithDecryption=True)
+    CHUNK_SIZE = 10
+    chunks = [names[i:i + CHUNK_SIZE] for i in range(0, len(names), CHUNK_SIZE)]
 
-    for p in r['Parameters']:
-        c = re.sub('{{ ?' + p['Name'] + ' ?}}', p['Value'], c)
+    for n in chunks:
+        r = boto3.client('ssm').get_parameters(Names=n, WithDecryption=True)
 
-names = re.findall(pattern, c)
+        for p in r['Parameters']:
+            FILE_CONTENTS = re.sub('{{ ?' + p['Name'] + ' ?}}', p['Value'], FILE_CONTENTS)
+
+names = re.findall(PATTERN, FILE_CONTENTS)
 if len(names) > 0:
     for name in names:
-        sys.stderr.write("ERROR: Configuration parameter was not replaced: \n\n\t{}\n\n".format(name))
+        err = f"ERROR: Configuration parameter was not replaced: \n\n\t{name}\n\n"
+        sys.stderr.write(err)
     sys.exit(1)
 
-if re.search('{{|}}|{ ?([^ ]*) ?}', c):
-    sys.stderr.write("ERROR: Configuration template contains malformed template strings: {}\n".format(fileinput.filename()))
+if re.search('{{|}}|{ ?([^ ]*) ?}', FILE_CONTENTS):
+    filename = fileinput.filename()
+    err = f"ERROR: Configuration template contains malformed template strings: {filename}\n"
+    sys.stderr.write(err)
     sys.exit(1)
 
-print(c)
+print(FILE_CONTENTS)
